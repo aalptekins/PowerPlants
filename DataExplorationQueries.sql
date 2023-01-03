@@ -8,7 +8,7 @@ FROM PowerPlants
 
 --Looking at the top 10 plants in the world according to their capacity
 
-SELECT TOP 10 country_long,[capacity in MW],primary_fuel
+SELECT TOP 10 country_long,[capacity in MW],primary_fuel,[name of powerplant]
 FROM PowerPlants
 ORDER BY [capacity in MW] DESC
 
@@ -45,7 +45,7 @@ ORDER BY TotalPower DESC
 
 --Looking at the top 10 plants in Turkey according to their capacity
 
-SELECT TOP 10 country_long,[capacity in MW],primary_fuel
+SELECT TOP 10 country_long,[capacity in MW],primary_fuel,[name of powerplant]
 FROM PowerPlants
 WHERE country_long = 'Turkey'
 ORDER BY [capacity in MW] DESC
@@ -68,6 +68,15 @@ GROUP BY primary_fuel
 ORDER BY TotalPower DESC
 
 
+--Number of plants that uses renewable and unrenewable sources in Turkey
+
+SELECT RenewableSource,COUNT(RenewableSource) AS NumberOfPlants
+FROM PowerPlants
+WHERE country_long='Turkey'
+GROUP BY RenewableSource
+
+
+
 --Most used fossil sources in Turkey
 
 SELECT primary_fuel,SUM([capacity in MW]) AS TotalPower
@@ -76,19 +85,52 @@ WHERE country_long = 'Turkey' and primary_fuel IN ('Coal','Gas','Oil')
 GROUP BY primary_fuel
 ORDER BY TotalPower DESC
 
+--Most used fuel sources in Turkey
+
+SELECT primary_fuel,SUM([capacity in MW]) AS TotalPower
+FROM PowerPlants
+WHERE country_long = 'Turkey' 
+GROUP BY primary_fuel
+ORDER BY TotalPower DESC
+
 
 --Looking at biggest plants owner in Turkey
 
-SELECT [owner of plant],SUM([capacity in MW]) AS TotalPower
+SELECT TOP 10 [owner of plant],SUM([capacity in MW]) AS TotalPower
 FROM PowerPlants
 WHERE country_long = 'Turkey'
 	AND [owner of plant] IS NOT NULL
 GROUP BY [owner of plant]
 ORDER BY TotalPower DESC
 
+
 SELECT *
 FROM PowerPlants
 WHERE country_long = 'Turkey'
 
 
+
+--Query for to see plants according to their primaryfuel
+
+SELECT primary_fuel,count(primary_fuel) as NumberofPlants
+FROM PowerPlants
+GROUP BY primary_fuel
+
+
+--Create a newcolumn according to if it uses renewable energy sources or not
+
+ALTER TABLE PowerPlants
+ADD RenewableSource NVARCHAR(50)
+
+UPDATE PowerPlants
+SET RenewableSource =( CASE 
+	WHEN primary_fuel IN ('Coal','Gas','Oil') THEN 'No'
+	WHEN primary_fuel NOT IN ('Coal','Gas','Oil') THEN 'Yes'
+	END);
+
+--Number of plants that uses renewable and unrenewable sources
+
+SELECT RenewableSource,COUNT(RenewableSource) AS NumberOfPlants
+FROM PowerPlants
+GROUP BY RenewableSource
 
